@@ -1,0 +1,31 @@
+{
+  "name": "serverapi",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "connect-redis": "^3.4.1",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "crypto-js": "^3.1.9-1",
+    "debug": "~2.6.9",
+    "dotenv": "^8.0.0",
+    "express": "~4.16.1",
+    "express-session": "^1.16.1",
+    "hbs": "~4.0.4",
+    "http-errors": "~1.6.3",
+    "mongodb": "^3.2.4",
+    "mongoose": "^5.5.6",
+    "monitor-dashboard": "^0.6.7",
+    "morgan": "~1.9.1",
+    "multer": "^1.4.1",
+    "nodemailer": "^6.3.0",
+    "nodemon": "^1.19.1",
+    "sendmail": "^1.6.1",
+    "shortid": "^2.2.14",
+    "socket.io": "^2.2.0"
+  }
+}
