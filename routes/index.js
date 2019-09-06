@@ -381,8 +381,14 @@ router.get('/orders/filters',(req, res)=>{
 /* get all orders */
 router.get('/orders', isAutheticated, (req, res) => {
   var filter = req.query.filter || {};
-  filter.by = req.user._id;
-  Order.find(filter)
+    filter.by = req.user._id;
+  Order.find({
+    by: req.user._id,
+    start: { $gte : req.query.from || 0, $lte: req.query.to || Infinity },
+    ticker: { $regex: new RegExp(req.query.q, "i") },
+    orderType: req.query.type.trim().toUpperCase() || '',
+    canceled: req.query.canceled || ''
+  })
     .populate({
       path: 'related_buy_transactions',
       select: 'buyOrder amount price time -_id confirmed',
@@ -636,7 +642,7 @@ router.get('/search/ticker', (req, res) => {
   ]})
   .exec((err, tickers) => {
     if (err) return handleError(err);
-    res.json({data: tickers});
+    res.json({data: {data: }{data: }tickers});
     // saved!
   });
 });
