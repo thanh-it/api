@@ -380,15 +380,16 @@ router.get('/orders/filters',(req, res)=>{
 
 /* get all orders */
 router.get('/orders', isAutheticated, (req, res) => {
-  var filter = req.query.filter || {};
-    filter.by = req.user._id;
-  Order.find({
+  var filter = {
     by: req.user._id,
     start: { $gte : req.query.from || 0, $lte: req.query.to || Infinity },
     ticker: { $regex: new RegExp(req.query.q, "i") },
-    orderType: req.query.type.trim().toUpperCase() || '',
-    canceled: req.query.canceled || ''
-  })
+    // orderType: req.query.type.trim().toUpperCase() || '',
+    // canceled: req.query.canceled || ''
+  };
+  if (req.query.canceled != undefined) filter.canceled = Boolean(req.query.canceled);
+  if (req.query.orderType != undefined) filter.orderType = req.query.type.trim().toUpperCase();
+  Order.find(filter)
     .populate({
       path: 'related_buy_transactions',
       select: 'buyOrder amount price time -_id confirmed',
@@ -433,8 +434,19 @@ router.get('/orders', isAutheticated, (req, res) => {
       });
     })
 });
-router.get('/fullorders', (req, res) => {
-  Order.find({}).populate('by').exec((err, data) => {
+router.get('/fullorders', isAdmin, (req, res) => {
+  var filter = {
+    // by: req.query.by,
+    start: { $gte : req.query.from || 0, $lte: req.query.to || Infinity },
+    ticker: { $regex: new RegExp(req.query.q || '', "i") },
+    // orderType: req.query.type.trim().toUpperCase() || '',
+    // canceled: req.query.canceled || null
+  };
+  if (req.query.canceled != undefined) filter.canceled = Boolean(req.query.canceled);
+  if (req.query.orderType != undefined) filter.orderType = req.query.type.trim().toUpperCase();
+  Order.find(filter)
+  .populate('by')
+  .exec((err, data) => {
     if (err) return res.json({
       error: err.message
     });
@@ -500,7 +512,7 @@ router.post('/order', isAutheticated, (req, res) => {
 
 });
 /* edit order */
-router.put('/order/:id', isAutheticated, (req, res) => {
+router.put('/order/:id', isAdmin, (req, res) => {
   Order.findOne({
     _id: req.body.id
   }, function(err, model) {
@@ -520,8 +532,16 @@ router.put('/order/:id', isAutheticated, (req, res) => {
 });
 /* ADMIN API */
 /* get all users */
-router.get('/users', (req, res) => {
-  User.find({}, (err, data) => {
+router.get('/users', isAdmin, (req, res) => {
+  var filter = {
+     email: { $regex: new RegExp(req.query.q || '', 'i') }
+  };
+  // if (req.query.q != undefined) filter['$or'] = [
+  //   { email: { $regex: new RegExp(req.query.q || '', 'i') } },
+  //   { phone: { $regex: new RegExp(req.query.q || '', 'i') } },
+  // ];
+  User.find(filter)
+  .exec((err, data) => {
     res.json({
       data: data
     });
@@ -642,7 +662,7 @@ router.get('/search/ticker', (req, res) => {
   ]})
   .exec((err, tickers) => {
     if (err) return handleError(err);
-    res.json({data: {data: }{data: }tickers});
+    res.json({data: tickers});
     // saved!
   });
 });
