@@ -7,7 +7,7 @@ var userSchema = new Schema({
         unique: true,
         required: true,
         dropDups: true
-    }, 
+    },
     confirmed:{
         type:Boolean,
         default: false,

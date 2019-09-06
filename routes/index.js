@@ -534,7 +534,12 @@ router.put('/order/:id', isAdmin, (req, res) => {
 /* get all users */
 router.get('/users', isAdmin, (req, res) => {
   var filter = {
-     email: { $regex: new RegExp(req.query.q || '', 'i') }
+    $or: [
+      { email: { $regex: new RegExp(req.query.q || '', 'i') } },
+      { name: { $regex: new RegExp(req.query.q || '', 'i') } },
+      // { phone: { $regex: new RegExp(req.query.q || '', 'i') } }
+      // { $where: 'function() { return this.phone.toString().match(/' + req.query.q + '/) != null; }' }
+    ]
   };
   // if (req.query.q != undefined) filter['$or'] = [
   //   { email: { $regex: new RegExp(req.query.q || '', 'i') } },
