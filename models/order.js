@@ -49,6 +49,16 @@ var orderSchema = new Schema({
     	type: Boolean,
     	require: true,
     	default: false
+    },
+    foreign: {
+    	type: Boolean,
+    	require: true,
+    	default: false
+    },
+    block: {
+    	type: Boolean,
+    	require: true,
+    	default: false
     }
 },  { 
     toObject: {

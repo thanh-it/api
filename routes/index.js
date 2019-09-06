@@ -443,7 +443,7 @@ router.post('/order', isAutheticated, (req, res) => {
   this_order.by = req.user._id;
   this_order.save(err => {
     if (err) return res.json(err);
-    Order.find({
+    Order.find({ //tim cac order khac thoa man dieu kien
         ticker: this_order.ticker,
         orderType: this_order.orderType == 'SELL' ? 'BUY' : 'SELL',
         canceled: false,
@@ -452,16 +452,22 @@ router.post('/order', isAutheticated, (req, res) => {
           } : {
             $lte: this_order.price
           },
-        amount: this_order.amount,
+        //amount: this_order.amount,
         start: this_order.start,
         end: this_order.end,
+        foreign: this_order.foreign //foreign order chi match voi foreign order
       })
       .populate('related_sell_transactions related_buy_transactions')
       .exec((err, matched_orders) => {
         var remaining = this_order.amount;
         matched_orders.forEach(match_order => {
           if (remaining <= 0) return;
-          var matched_amount = Math.min(remaining, remainingQuantity(match_order));
+          if (match_order.by == this_order.by) return; //neu 2 order do cung 1 nguoi dat thi ko khop
+          var matched_amount = Math.min(remaining, remainingQuantity(match_order)); //khoi luong khop = khoi luong con lai nho hon
+          /* neu 1 trong 2 order la block order va khoi luong khop < khoi luong cua order do thi ko khop */
+          if (this_order.block && matched_amount < this_order.amount) return;
+          if (match_order.block && matched_amount < match_order.amount) return;
+          
           if (matched_amount) {
             var transaction = new Transaction({
               buyOrder: this_order.orderType == 'SELL' ? match_order._id : this_order._id,
@@ -622,13 +628,17 @@ router.delete('/ticker/:id', isAdmin, (req, res) => {
   });
 });
 /* search ticker */
-router.get('/search/ticker', isAdmin, (req, res) => {
+router.get('/search/ticker', (req, res) => {
   //?q=
-  var tickers = new Ticker(data);
-  tickers.save(function(err) {
+  Ticker.find({ $or: [
+    { code: { $regex: new RegExp(req.query.q, "i") }},
+    { company: { $regex: new RegExp(req.query.q, "i") }}
+  ]})
+  .exec((err, tickers) => {
     if (err) return handleError(err);
+    res.json({data: tickers});
     // saved!
-  })
+  });
 });
 router.get('/admin/messages', isAdmin, (req, res) => {
   Messages.find({}, (err, data) => {
