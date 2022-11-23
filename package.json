@@ -26,6 +26,6 @@
     "nodemon": "^1.19.1",
     "sendmail": "^1.6.1",
     "shortid": "^2.2.14",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.5.0"
   }
 }
